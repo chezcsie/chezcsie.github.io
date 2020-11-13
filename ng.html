@@ -1,0 +1,249 @@
+<head>
+<link rel="stylesheet" href="my.css">
+</head>
+
+<input type="button" value="Generate Table" onclick="GenerateTable()" />
+<hr />
+<div id="dvTable"></div>
+<br>
+<div id="matchTable"></div>
+<div id="result"><p style="font-size:18px"></p></div>
+
+<script type="text/javascript">
+    function getRandom(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
+    };
+    var player_matrix = new Array();
+    var p_n = 20;
+    function GenerateTable() {
+        //Build an array containing Customer records.
+         //p_n = prompt('How many players?');
+         
+        
+        player_matrix.push(["Player", "Name", "Role", "Age","Entropy"]);
+        for(var i=0; i<p_n; i++) {
+           //var p_name = prompt('Name of Player' + (i+1));
+           //var p_sex = prompt('Role of Player' + (i+1));
+           //var p_age = prompt('Age of Player' + (i+1));
+           //var p_entropy = prompt('Entropy of Player' + (i+1));
+           var p_name ="Player"+(i+1);
+           var p_sex = (i+1);
+           var p_age = (i+1);
+           var p_entropy = (i+1);
+           
+           player_matrix.push([i+1, p_name, p_sex ,p_age,  p_entropy]);
+       
+        }
+
+ 
+        //Create a HTML Table element.
+        var table = document.createElement("TABLE");
+        table.border = "1";
+ 
+        //Get the count of columns.
+        var columnCount = player_matrix[0].length;
+ 
+        //Add the header row.
+        var row = table.insertRow(-1);
+        for (var i = 0; i < columnCount; i++) {
+            var headerCell = document.createElement("TH");
+            headerCell.innerHTML = player_matrix[0][i];
+            row.appendChild(headerCell);
+        }
+ 
+        //Add the data rows.
+        for (var i = 1; i < player_matrix.length; i++) {
+            row = table.insertRow(-1);
+            for (var j = 0; j < columnCount; j++) {
+                var cell = row.insertCell(-1);
+                cell.innerHTML = player_matrix[i][j];
+            }
+        }
+ 
+        var dvTable = document.getElementById("dvTable");
+        dvTable.innerHTML = "";
+        dvTable.appendChild(table);
+        
+        var btn = document.createElement("input");
+        btn.type = 'button';
+        btn.onclick =  matchtime; 
+        btn.value='Match';
+        var matchTable = document.getElementById("matchTable");
+        matchTable.innerHTML = "";
+        matchTable.appendChild(btn);
+    }
+    function matchtime() {
+      var matchArr = new Array();
+       var matchCache = [p_n]
+      //matchArr = player_matrix;
+      //match algorithm
+      for (var p = 0; p <= p_n; p++)
+      {
+          matchArr[p] = [];
+          
+      }
+      for (var p = 0; p <= p_n; p++)
+      {
+
+           for (var mate = 0; mate <= p_n; mate++)
+           {
+               if (p ==0)
+               { 
+                   matchArr[p][mate] = player_matrix[mate][1];
+                   continue;
+               }
+               if (mate ==0)
+               { 
+                   matchArr[p][mate] = player_matrix[p][1];
+                   continue;
+               }
+               if (mate == p )
+               {
+               matchArr[p][mate] = 0;
+                   continue;
+               }   
+               matchArr[p][mate] = getRandom(1,50);
+               var role_weight = Math.abs(player_matrix[p][2] - player_matrix[mate][2] );
+               var age_weight = Math.abs(player_matrix[p][3] - player_matrix[mate][3] );
+               var entro_weight  = Math.abs( (player_matrix[p][4] * player_matrix[mate][4]) %50 );
+               var cal = matchArr[p][mate];
+               
+               cal = cal  + entro_weight;
+               cal = cal *role_weight;
+               cal = cal * age_weight *0.1;
+               cal = (cal % 100);
+               var fcal =  Math.round(cal);
+               matchArr[p][mate] = fcal;
+
+               //console.log("Player:"+p+ "& Player:" +mate+ "=> RoleW ="+role_weight+ "AgeW = " +age_weight+"EntroW = "+entro_weight+"..CAL="+cal);
+               //matchArr[p][mate] = p;
+           }
+      
+      }
+      
+
+      var table = document.createElement("TABLE");
+      table.border = "1";
+
+      var columnCount = matchArr[0].length;
+       
+     
+      var row = table.insertRow(-1);
+      for (var i = 0; i < columnCount; i++) {
+            var headerCell = document.createElement("TH");
+            headerCell.innerHTML = matchArr[0][i];
+            row.appendChild(headerCell);
+      }
+ 
+       
+      for (var i = 1; i < matchArr.length; i++) {
+            row = table.insertRow(-1);
+            for (var j = 0; j < columnCount; j++) {
+                var cell = row.insertCell(-1);
+                cell.innerHTML = matchArr[i][j];
+            }
+      }
+ 
+      var matchTable = document.getElementById("matchTable");
+      matchTable.innerHTML = "";
+      matchTable.appendChild(table);
+      var norematch = [];
+      var taken = [];
+      for (var p = 0; p <= p_n; p++)
+      {
+          norematch[p] = 0;
+          taken[p]  = 0;
+      }
+      
+      
+      var result = new Array();
+      for (var p = 1; p <= p_n; p++)
+      {
+           var arr = matchArr[p];
+           arr.shift(); 
+
+               //console.log(arr);
+              var max_of_array = Math.max.apply(Math, arr);
+              var id =  arr.indexOf(Math.max(...arr)) ;
+              var tempTaken = [...taken];
+              restart:
+ 
+              while(1)
+              {
+                  for (var x = 1; x <= p_n; x++)
+                  {
+   
+                      if (tempTaken[x] == id+1)
+                      {     //arr.splice(id, 1);
+                            arr[id] = 0;
+                            
+                            id =  arr.indexOf(Math.max(...arr)) ;
+                            max_of_array = Math.max.apply(Math, arr);
+                            tempTaken[x] = 0;
+                            continue restart;      
+                       }
+                       
+                  }
+                  break;
+              }
+             
+              if (norematch[id+1] == p) //no rematch
+              {
+                  //arr.splice(id, 1);
+                   console.log("REmATCH!!...id:"+(id+1)+"...arr="+arr);
+                  arr[id] = 0;
+                  console.log("New arr="+arr);
+                  id =  arr.indexOf(Math.max(...arr));
+                  max_of_array = Math.max.apply(Math, arr);
+                  //matchTable.innerHTML += 'Player'+p+": gives to Player*:"+(id+1)+"("+max_of_array+'%)<br>';
+                  result.push(['Player'+p+": gives to Player*:"+(id+1) , "("+max_of_array+'%)<br>']);
+              }
+              else
+              {
+                  //matchTable.innerHTML += 'Player'+p+": gives to Player:"+(id+1)+"("+max_of_array+'%)<br>';
+                  result.push(['Player'+p+": gives to Player:"+(id+1),"("+max_of_array+'%)<br>']);
+              }
+              taken[p] = id+1;
+              norematch[p] = id+1;
+               console.log(taken);
+               //console.log(norematch);
+          
+      }
+       var resultT = document.createElement("TABLE");
+      resultT.border = "1";
+      var columnCount = result[0].length;
+       
+     
+      var row = resultT.insertRow(-1);
+      for (var i = 0; i < columnCount; i++) {
+            var headerCell = document.createElement("TH");
+            headerCell.innerHTML = result[0][i];
+            row.appendChild(headerCell);
+      }
+ 
+       
+      for (var i = 1; i < result.length; i++) {
+            row = resultT.insertRow(-1);
+            for (var j = 0; j < columnCount; j++) {
+                var cell = row.insertCell(-1);
+                cell.innerHTML = result[i][j];
+            }
+      }
+ 
+      var resultShow = document.getElementById("result");
+      resultShow.innerHTML = "";
+      resultShow.appendChild(resultT);
+      
+      
+
+    }
+    var invoke_make_blank = true;
+function make_blank()
+{
+    if (invoke_make_blank)
+    {
+        document.form1.user_name.value ="";
+        invoke_make_blank = false;
+    }
+}
+</script>
