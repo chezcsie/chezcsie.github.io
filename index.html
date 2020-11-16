@@ -112,8 +112,8 @@ Entropy is a magic number<br>
                var cal = matchArr[p][mate];
                
                cal = cal  + entro_weight;
-               cal = cal *role_weight;
-               cal = cal * age_weight *0.1;
+               cal = cal + (20 * role_weight);
+               cal = cal + ( 10 *  age_weight);
                cal = (cal % 100);
                var fcal =  Math.round(cal);
                matchArr[p][mate] = fcal;
