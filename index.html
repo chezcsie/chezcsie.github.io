@@ -115,7 +115,7 @@ Entropy is a magic number<br>
                cal = cal *role_weight;
                cal = cal * age_weight *0.1;
                cal = (cal % 100);
-               var fcal =  Math.round(cal);
+               var fcal =  Math.round(cal* 100) / 100;
                matchArr[p][mate] = fcal;
                if (player_matrix[p][4] == mate) //magical blocker
                     matchArr[p][mate] = 0;
